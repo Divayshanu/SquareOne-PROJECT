@@ -29,7 +29,7 @@ class Marquee(Canvas):
             self.move("text", -1, 0)
         self.after_id = self.after(int(1000 / self.fps), self.animate)
 
-
+# register 
 def register():
     pass
 
