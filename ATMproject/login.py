@@ -4,6 +4,20 @@ from tkinter import *
 import datetime as dt
 from subprocess import Popen
 import sys
+from cv2 import cv2
+import os
+import csv
+import pandas as pd
+import time
+import tkinter.font as font
+import pyrebase
+from firebase import firebase
+from google.cloud import storage
+from google.cloud.storage.blob import Blob
+import tkinter.filedialog
+from PIL import Image, ImageTk
+from tkinter import messagebox
+
 
 
 
@@ -33,7 +47,99 @@ class Marquee(Canvas):
         self.after_id = self.after(int(1000 / self.fps), self.animate)
 
 def scanImage():
-    pass
+        FaceRecognize = cv2.face.LBPHFaceRecognizer_create()
+        FaceRecognize.read("AllData/TrainedData/DataTrained.yml")
+        harcascadeFilePath = "AllData/haarcascade_frontalface_default.xml"
+        faceCascade = cv2.CascadeClassifier(harcascadeFilePath)
+        datafile = pd.read_csv("AllData/StudentDataRecord.csv")
+        collum_names = ['Id', 'Name', 'Date', 'Time']
+        AttendanceOfStudent = pd.DataFrame(columns=collum_names)
+
+        cap = cv2.VideoCapture(0)
+        if(cap.isOpened() == False):
+            messagebox.showerror(title="Error", message="There is some problem with your camera"
+                                 )
+            root.destroy()
+
+        while True:
+            _, img = cap.read()
+            if(_ == False):
+                messagebox.showerror(title="Error", message="You have to close video running on home page or select image checkbox"
+                                     )
+                root.destroy()
+                break
+
+            grayImg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            Detectedfaces = faceCascade.detectMultiScale(grayImg, 1.2, 5)
+            for(x, y, width, height) in Detectedfaces:
+                cv2.rectangle(img, (x, y), (x+width, y+height), (225, 0, 0), 2)
+                Id, confidence = FaceRecognize.predict(
+                    grayImg[y:y+height, x:x+width])
+                if(confidence <= 50):
+                    CurrentTime = time.time()
+                    CurrentDate = dt.datetime.fromtimestamp(
+                        CurrentTime).strftime('%Y-%m-%d')
+                    timeStamp = dt.datetime.fromtimestamp(
+                        CurrentTime).strftime('%H:%M:%S')
+                    name = datafile.loc[datafile['Id'] == Id]['Name'].values
+                    key = str(Id)+"-"+name
+                    AttendanceOfStudent.loc[len(AttendanceOfStudent)] = [
+                        Id, name, CurrentDate, timeStamp]
+
+                else:
+                    Id = 'Unknown'
+                    key = str(Id)
+
+                cv2.putText(img, str(key), (x, y+height),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            AttendanceOfStudent = AttendanceOfStudent.drop_duplicates(
+                subset=['Id'], keep='first')
+
+            cv2.imshow('Face Recognizing', img)
+
+            if cv2.waitKey(100) & 0xFF == ord('q'):
+
+                break
+
+        CurrentTime = time.time()
+        CurrentDate = dt.datetime.fromtimestamp(
+            CurrentTime).strftime('%Y-%m-%d')
+        timeStamp = dt.datetime.fromtimestamp(
+            CurrentTime).strftime('%H:%M:%S')
+        Hour, Minute, Second = timeStamp.split(":")
+
+        fileName = "AllData/StudentAttendance/StudentAttendance_" + \
+            CurrentDate+"_"+Hour+"-"+Minute+".csv"
+        AttendanceOfStudent.to_csv(fileName, index=True)
+        Firebase = pyrebase.initialize_app(firebaseConfig)
+        storage = Firebase.storage()
+        bllob = storage.child('uploads/' + fileName).put(fileName)
+
+        StudentData = {'name': "Date: "+CurrentDate+" Time: "+Hour+"-"+Minute+"--"+Second, 'url': "https://firebasestorage.googleapis.com/v0/b/ <gs://fir-demo-cc179.appspot.com/> %2FAttendance%5CAttendance_" +
+                       CurrentDate+"_"+Hour+"-"+Minute+".csv?alt=media&token="+bllob['downloadTokens']}
+
+        UploadDataToDatabase = firebase.post('/uploads', StudentData)
+        retrivedData = AttendanceOfStudent
+        StudentsPresent.configure(text=retrivedData)
+        cap.release()
+        cv2.destroyAllWindows()
+
+    
+firebaseConfig = {
+        "apiKey": "AIzaSyABckEgLXuIltOAfKIjBH4paT3oimwelKI",
+        "authDomain": "python-firebasesdkinteexample.firebaseapp.com",
+        "databaseURL": "https://python-firebasesdkinteexample.firebaseio.com",
+        "projectId": "python-firebasesdkinteexample",
+        "storageBucket": "python-firebasesdkinteexample.appspot.com",
+        "messagingSenderId": "687025953277",
+        "appId": "1:687025953277:web:cafc0f5714677498562194",
+        "measurementId": "G-C426GLDT23"
+    }
+
+firebase = firebase.FirebaseApplication(
+        "https://python-firebasesdkinteexample.firebaseio.com/", None)
+BlobStorage = Blob.from_string(
+        "gs://python-firebasesdkinteexample.appspot.com")
 
 
 if __name__ == "__main__":
