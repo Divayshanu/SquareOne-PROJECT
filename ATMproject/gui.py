@@ -3,6 +3,8 @@ from tkinter import *
 from tkinter import Tk
 from tkinter import ttk
 import datetime as dt
+from subprocess import Popen
+import sys
 
 
 class Marquee(Canvas):
@@ -31,7 +33,11 @@ class Marquee(Canvas):
 
 # register 
 def register():
-    pass
+    Popen([sys.executable, "./register.py"])
+
+
+def login():
+    Popen( [sys.executable, "./login.py"])
 
 
 if __name__ == "__main__":
@@ -45,7 +51,8 @@ if __name__ == "__main__":
     Atm_root.title("Chitkara ATM")
     # Atm_root.iconbitmap('ATM-icon.icns')
 
-    photo = PhotoImage(file="cu_image1.png")
+    photo1 = PhotoImage(file="cu_image1.png")
+    photo2 = PhotoImage(file="menu_1.png")
 
     # top frame
     t_frame = Frame(Atm_root, bg="black", relief=SUNKEN)
@@ -62,7 +69,7 @@ if __name__ == "__main__":
     p_frame = Frame(Atm_root, bg="black", relief=SUNKEN, bd=1)
     p_frame.grid(row=1, column=0, sticky='nsew')
 
-    p_lable = Label(p_frame, image=photo, bg="white",
+    p_lable = Label(p_frame, image=photo1, bg="white",
                     borderwidth=3)
     p_lable.pack(side="top", fill=BOTH,)
 
@@ -84,30 +91,29 @@ if __name__ == "__main__":
     bottom_lside_frame.grid(row=0, column=0, sticky='nsew')
     # bottom_lside_frame.pack(side=LEFT, fill=BOTH)
 
-    lp_lable = Label(bottom_lside_frame, image=photo,
-                     bg="white", borderwidth=3)
+    lp_lable = Label(bottom_lside_frame, image=photo2,
+                   bg="white", borderwidth=3)
     lp_lable.pack(side=LEFT, fill=X)
 
     bottom_rside_frame = Frame(r_frame, bg="black", relief=SUNKEN)
     bottom_rside_frame.grid(row=0, column=1, sticky='nsew')
     # bottom_rside_frame.pack(side=RIGHT, fill=BOTH)
 
-    r_button = Button(bottom_rside_frame, text="REGISTER", bg="yellow", fg="black",
-                      font="times 30 bold", relief=SUNKEN, bd=4, command=register)
+    r_button = Button(bottom_rside_frame, text="REGISTER", highlightbackground='#ffff00', fg="black",
+                      font="times 30 bold", relief=SUNKEN, bd=2, command=register)
     r_button.grid(row=0, column=0, sticky='nsew', pady=(35, 15), padx=(5, 5))
 
-# lg_frame = Frame(Atm_root, bg="gray5", relief=SUNKEN)
-# lg_frame.grid(row=5, column=0)
+    # lg_frame = Frame(Atm_root, bg="gray5", relief=SUNKEN)
+    # lg_frame.grid(row=5, column=0)
 
-    l_button = Button(bottom_rside_frame, text="LOGIN", bg="green", fg="white",
-                      font="times 30 bold", relief=SUNKEN, bd=4, command=register)
+    l_button = Button(bottom_rside_frame, text="LOGIN", highlightbackground='#00cc00', fg="black",
+                      font="times 30 bold", relief=SUNKEN, bd=2, command=login)
     l_button.grid(row=1, column=0, sticky='nsew', pady=(17, 15), padx=(5, 5))
 
     # q_frame = Frame(Atm_root, bg="gray5", relief=SUNKEN)
     # q_frame.grid(row=5, column=0, sticky='e')
-
-    q_button = Button(bottom_rside_frame, text="EXIT", bg="red", fg="white",
-                      font="times 30 bold", relief=SUNKEN, bd=4, command=quit)
+    q_button = Button(bottom_rside_frame, text="EXIT", highlightbackground='#b30000', fg="black",
+                      font="times 30 bold", relief=SUNKEN, bd=2, command=quit)
 
     q_button.grid(row=2, column=0, sticky='nsew', pady=(17, 1), padx=(5, 5))
 
