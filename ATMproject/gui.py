@@ -5,6 +5,8 @@ from tkinter import ttk
 import datetime as dt
 from subprocess import Popen
 import sys
+import firebase_admin
+from firebase_admin import credentials
 
 
 class Marquee(Canvas):
@@ -33,15 +35,20 @@ class Marquee(Canvas):
 
 # register 
 def register():
+    Atm_root.destroy()
     Popen([sys.executable, "./register.py"])
 
 
 def login():
+    Atm_root.destroy()
     Popen( [sys.executable, "./login.py"])
 
 
 if __name__ == "__main__":
 
+    cred = credentials.Certificate("firebaseKey.json")
+    firebase_admin.initialize_app(cred)
+    
     Atm_root = Tk()
 
     Atm_root.geometry("1000x750")

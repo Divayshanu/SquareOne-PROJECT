@@ -84,6 +84,11 @@ if __name__ == "__main__":
         FacesArray = []
         IdArray = []
         for path in ImagesPath:
+
+            if path == 'AllData/DataSetImages/' + '.DS_Store':
+                continue
+
+            
             pilImage = Image.open(path).convert('L')
             imageNp = np.array(pilImage, 'uint8')
             Id = int(os.path.split(path)[-1].split(".")[1])

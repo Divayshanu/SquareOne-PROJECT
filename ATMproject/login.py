@@ -46,6 +46,7 @@ class Marquee(Canvas):
             self.move("text", -1, 0)
         self.after_id = self.after(int(1000 / self.fps), self.animate)
 
+        
 def scanImage():
         FaceRecognize = cv2.face.LBPHFaceRecognizer_create()
         FaceRecognize.read("AllData/TrainedData/DataTrained.yml")
@@ -75,6 +76,7 @@ def scanImage():
                 cv2.rectangle(img, (x, y), (x+width, y+height), (225, 0, 0), 2)
                 Id, confidence = FaceRecognize.predict(
                     grayImg[y:y+height, x:x+width])
+                
                 if(confidence <= 50):
                     CurrentTime = time.time()
                     CurrentDate = dt.datetime.fromtimestamp(
@@ -113,33 +115,33 @@ def scanImage():
         AttendanceOfStudent.to_csv(fileName, index=True)
         Firebase = pyrebase.initialize_app(firebaseConfig)
         storage = Firebase.storage()
-        bllob = storage.child('uploads/' + fileName).put(fileName)
+        # bllob = storage.child('uploads/' + fileName).put(fileName)
 
-        StudentData = {'name': "Date: "+CurrentDate+" Time: "+Hour+"-"+Minute+"--"+Second, 'url': "https://firebasestorage.googleapis.com/v0/b/ <gs://fir-demo-cc179.appspot.com/> %2FAttendance%5CAttendance_" +
-                       CurrentDate+"_"+Hour+"-"+Minute+".csv?alt=media&token="+bllob['downloadTokens']}
+        # StudentData = {'name': "Date: "+CurrentDate+" Time: "+Hour+"-"+Minute+"--"+Second, 'url': "https://firebasestorage.googleapis.com/v0/b/ <gs://fir-demo-cc179.appspot.com/> %2FAttendance%5CAttendance_" +
+        #                CurrentDate+"_"+Hour+"-"+Minute+".csv?alt=media&token="+bllob['downloadTokens']}
 
-        UploadDataToDatabase = firebase.post('/uploads', StudentData)
+        # UploadDataToDatabase = firebase.post('/uploads', StudentData)
         retrivedData = AttendanceOfStudent
-        StudentsPresent.configure(text=retrivedData)
+        # StudentsPresent.configure(text=retrivedData)
         cap.release()
         cv2.destroyAllWindows()
 
     
 firebaseConfig = {
-        "apiKey": "AIzaSyABckEgLXuIltOAfKIjBH4paT3oimwelKI",
-        "authDomain": "python-firebasesdkinteexample.firebaseapp.com",
-        "databaseURL": "https://python-firebasesdkinteexample.firebaseio.com",
-        "projectId": "python-firebasesdkinteexample",
-        "storageBucket": "python-firebasesdkinteexample.appspot.com",
-        "messagingSenderId": "687025953277",
-        "appId": "1:687025953277:web:cafc0f5714677498562194",
-        "measurementId": "G-C426GLDT23"
-    }
+    "apiKey" : "AIzaSyBJi9VLoYk6acx6gjdeunkD3smeNw_fF34",
+    "authDomain": "squareoneatm.firebaseapp.com",
+    "databaseURL": "https://squareoneatm.firebaseio.com",
+    "projectId": "squareoneatm",
+    "storageBucket": "squareoneatm.appspot.com",
+   "messagingSenderId": "945899734915",
+    "appId": "1:945899734915:web:71459240c9c94e819818b6",
+    "measurementId": "G-T2D1QNRRF6"
+  }
 
-firebase = firebase.FirebaseApplication(
-        "https://python-firebasesdkinteexample.firebaseio.com/", None)
-BlobStorage = Blob.from_string(
-        "gs://python-firebasesdkinteexample.appspot.com")
+# firebase = firebase.FirebaseApplication(
+#         "https://python-firebasesdkinteexample.firebaseio.com/", None)
+# BlobStorage = Blob.from_string(
+#         "gs://python-firebasesdkinteexample.appspot.com")
 
 
 if __name__ == "__main__":
