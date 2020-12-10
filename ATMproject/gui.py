@@ -33,7 +33,6 @@ class Marquee(Canvas):
             self.move("text", -1, 0)
         self.after_id = self.after(int(1000 / self.fps), self.animate)
 
-# register 
 def register():
     Atm_root.destroy()
     Popen([sys.executable, "./register.py"])
@@ -46,8 +45,6 @@ def login():
 
 if __name__ == "__main__":
 
-    cred = credentials.Certificate("firebaseKey.json")
-    firebase_admin.initialize_app(cred)
     
     Atm_root = Tk()
 
@@ -56,12 +53,10 @@ if __name__ == "__main__":
     Atm_root.minsize(1000, 750)
     Atm_root.maxsize(1000, 750)
     Atm_root.title("Chitkara ATM")
-    # Atm_root.iconbitmap('ATM-icon.icns')
 
     photo1 = PhotoImage(file="cu_image1.png")
     photo2 = PhotoImage(file="menu_1.png")
 
-    # top frame
     t_frame = Frame(Atm_root, bg="black", relief=SUNKEN)
     t_frame.grid(row=0, column=0, sticky="nsew")
 
@@ -72,7 +67,6 @@ if __name__ == "__main__":
                       borderwidth=2, relief="sunken", bg="red")
     marquee.pack(side="top", fill=X, expand=True)
 
-    # photo frame
     p_frame = Frame(Atm_root, bg="black", relief=SUNKEN, bd=1)
     p_frame.grid(row=1, column=0, sticky='nsew')
 
@@ -87,7 +81,6 @@ if __name__ == "__main__":
                       borderwidth=2, relief="sunken", bg="red")
     marquee.pack(side="top", fill=X, expand=True)
 
-    # bottom frame
     r_frame = Frame(Atm_root, bg="black", relief=SUNKEN)
     r_frame.grid(row=4, column=0, sticky='nsew')
 
@@ -96,7 +89,6 @@ if __name__ == "__main__":
 
     bottom_lside_frame = Frame(r_frame, bg="black", relief=SUNKEN)
     bottom_lside_frame.grid(row=0, column=0, sticky='nsew')
-    # bottom_lside_frame.pack(side=LEFT, fill=BOTH)
 
     lp_lable = Label(bottom_lside_frame, image=photo2,
                    bg="white", borderwidth=3)
@@ -104,31 +96,25 @@ if __name__ == "__main__":
 
     bottom_rside_frame = Frame(r_frame, bg="black", relief=SUNKEN)
     bottom_rside_frame.grid(row=0, column=1, sticky='nsew')
-    # bottom_rside_frame.pack(side=RIGHT, fill=BOTH)
 
     r_button = Button(bottom_rside_frame, text="REGISTER", highlightbackground='#ffff00', fg="black",
                       font="times 30 bold", relief=SUNKEN, bd=2, command=register)
-    r_button.grid(row=0, column=0, sticky='nsew', pady=(35, 15), padx=(5, 5))
-
-    # lg_frame = Frame(Atm_root, bg="gray5", relief=SUNKEN)
-    # lg_frame.grid(row=5, column=0)
+    r_button.grid(row=0, column=0, sticky='nsew', pady=(50, 30), padx=(5, 5))
 
     l_button = Button(bottom_rside_frame, text="LOGIN", highlightbackground='#00cc00', fg="black",
                       font="times 30 bold", relief=SUNKEN, bd=2, command=login)
-    l_button.grid(row=1, column=0, sticky='nsew', pady=(17, 15), padx=(5, 5))
+    l_button.grid(row=1, column=0, sticky='nsew', pady=(30, 30), padx=(5, 5))
 
-    # q_frame = Frame(Atm_root, bg="gray5", relief=SUNKEN)
-    # q_frame.grid(row=5, column=0, sticky='e')
     q_button = Button(bottom_rside_frame, text="EXIT", highlightbackground='#b30000', fg="black",
                       font="times 30 bold", relief=SUNKEN, bd=2, command=quit)
 
-    q_button.grid(row=2, column=0, sticky='nsew', pady=(17, 1), padx=(5, 5))
+    q_button.grid(row=2, column=0, sticky='nsew', pady=(30, 50), padx=(5, 5))
 
     d_frame = Frame(Atm_root, bg="black", relief=SUNKEN)
     d_frame.grid(row=5,  sticky='nsew')
 
-    status_label = Label(d_frame, text=(f"{dt.datetime.now():%a, %b %d %Y}"),
-                         relief=SUNKEN, font="ComicSansMs 10", fg='linen', bg='gray3', bd=0.5, anchor=W)
+    status_label = Label(d_frame, text=(f"{dt.datetime.now():%a, %b %d %Y}"+",BY-Divay Shanu(1710991234)"),
+                         relief=SUNKEN, font="ComicSansMs 10", fg='gold2', bg='gray3', bd=0.5, anchor=W)
     status_label.pack(fill=X, side=BOTTOM)
 
     Atm_root.mainloop()

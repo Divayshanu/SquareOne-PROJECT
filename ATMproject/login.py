@@ -17,10 +17,9 @@ from google.cloud.storage.blob import Blob
 import tkinter.filedialog
 from PIL import Image, ImageTk
 from tkinter import messagebox
-
-
-
-
+from subprocess import Popen
+import sys
+import sqlite3
 
 class Marquee(Canvas):
     def __init__(self, parent, text, margin=3, borderwidth=2, relief='flat', bg="red", fps=100):
@@ -48,110 +47,96 @@ class Marquee(Canvas):
 
         
 def scanImage():
-        FaceRecognize = cv2.face.LBPHFaceRecognizer_create()
-        FaceRecognize.read("AllData/TrainedData/DataTrained.yml")
-        harcascadeFilePath = "AllData/haarcascade_frontalface_default.xml"
-        faceCascade = cv2.CascadeClassifier(harcascadeFilePath)
-        datafile = pd.read_csv("AllData/StudentDataRecord.csv")
-        collum_names = ['Id', 'Name', 'Date', 'Time']
-        AttendanceOfStudent = pd.DataFrame(columns=collum_names)
+    FaceRecognize = cv2.face.LBPHFaceRecognizer_create()
+    FaceRecognize.read("AllData/TrainedData/DataTrained.yml")
+    harcascadeFilePath = "AllData/haarcascade_frontalface_default.xml"
+    faceCascade = cv2.CascadeClassifier(harcascadeFilePath)
+    datafile = pd.read_csv("AllData/StudentDataRecord.csv")
+    collum_names = ['Id', 'Name', 'Date', 'Time']
+    LoginStudent = pd.DataFrame(columns=collum_names)
 
-        cap = cv2.VideoCapture(0)
-        if(cap.isOpened() == False):
-            messagebox.showerror(title="Error", message="There is some problem with your camera"
+        
+
+    cap = cv2.VideoCapture(0)
+    if(cap.isOpened() == False):
+        messagebox.showerror(title="Error", message="There is some problem with your camera"
                                  )
-            root.destroy()
+        root.destroy()
 
-        while True:
-            _, img = cap.read()
-            if(_ == False):
-                messagebox.showerror(title="Error", message="You have to close video running on home page or select image checkbox"
+    while True:
+        _, img = cap.read()
+        if(_ == False):
+            messagebox.showerror(title="Error", message="You have to close video running on home page or select image checkbox"
                                      )
-                root.destroy()
-                break
+            root.destroy()
+            break
 
-            grayImg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            Detectedfaces = faceCascade.detectMultiScale(grayImg, 1.2, 5)
-            for(x, y, width, height) in Detectedfaces:
-                cv2.rectangle(img, (x, y), (x+width, y+height), (225, 0, 0), 2)
-                Id, confidence = FaceRecognize.predict(
-                    grayImg[y:y+height, x:x+width])
+        grayImg = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        Id = 0
+        Detectedfaces = faceCascade.detectMultiScale(grayImg, 1.2,10)
+        for(x, y, width, height) in Detectedfaces:
+            cv2.rectangle(img, (x, y), (x+width, y+height), (225, 0, 0), 2)
+            Id, confidence = FaceRecognize.predict(
+                grayImg[y:y+height, x:x+width])
+
+            if(confidence <= 50):
+                CurrentTime = time.time()
+                CurrentDate = dt.datetime.fromtimestamp(
+                    CurrentTime).strftime('%Y-%m-%d')
+                timeStamp = dt.datetime.fromtimestamp(
+                    CurrentTime).strftime('%H:%M:%S')
+                name = datafile.loc[datafile['Id'] == Id]['Name'].values
+                key = str(Id)+"-"+name
+                LoginStudent.loc[len(LoginStudent)] = [
+                    Id, name, CurrentDate, timeStamp]
+
+
+            else:
+                Id = 'Unknown'
+                key = str(Id)
+
+            cv2.putText(img, str(key), (x, y+height),
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        LoginStudent = LoginStudent.drop_duplicates(
+            subset=['Id'], keep='first')
+
+        cv2.imshow('Face Recognizing', img)
+            
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+
+            if Id != 'Unknown':
+                my_conn = sqlite3.connect('SquareOne.db')
+                my_conn.execute(''' UPDATE IdName SET id = %s'''%(Id))
+                my_conn.commit()
+
+            if Id != 'Unknown':
                 
-                if(confidence <= 50):
-                    CurrentTime = time.time()
-                    CurrentDate = dt.datetime.fromtimestamp(
-                        CurrentTime).strftime('%Y-%m-%d')
-                    timeStamp = dt.datetime.fromtimestamp(
-                        CurrentTime).strftime('%H:%M:%S')
-                    name = datafile.loc[datafile['Id'] == Id]['Name'].values
-                    key = str(Id)+"-"+name
-                    AttendanceOfStudent.loc[len(AttendanceOfStudent)] = [
-                        Id, name, CurrentDate, timeStamp]
+                res = messagebox.askquestion(title="Congratulation", message="WELCOME TO SQUARE ONE \n Press Yes To Proceed")
 
+                if res =="yes":
+                    root.destroy()
+                    Popen([sys.executable, "./mainpage.py"])
                 else:
-                    Id = 'Unknown'
-                    key = str(Id)
+                    root.destroy()
+                    Popen( [sys.executable, "./gui.py"])
 
-                cv2.putText(img, str(key), (x, y+height),
-                            cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-            AttendanceOfStudent = AttendanceOfStudent.drop_duplicates(
-                subset=['Id'], keep='first')
-
-            cv2.imshow('Face Recognizing', img)
-
-            if cv2.waitKey(100) & 0xFF == ord('q'):
-
-                break
-
-        CurrentTime = time.time()
-        CurrentDate = dt.datetime.fromtimestamp(
-            CurrentTime).strftime('%Y-%m-%d')
-        timeStamp = dt.datetime.fromtimestamp(
-            CurrentTime).strftime('%H:%M:%S')
-        Hour, Minute, Second = timeStamp.split(":")
-
-        fileName = "AllData/StudentAttendance/StudentAttendance_" + \
-            CurrentDate+"_"+Hour+"-"+Minute+".csv"
-        AttendanceOfStudent.to_csv(fileName, index=True)
-        Firebase = pyrebase.initialize_app(firebaseConfig)
-        storage = Firebase.storage()
-        # bllob = storage.child('uploads/' + fileName).put(fileName)
-
-        # StudentData = {'name': "Date: "+CurrentDate+" Time: "+Hour+"-"+Minute+"--"+Second, 'url': "https://firebasestorage.googleapis.com/v0/b/ <gs://fir-demo-cc179.appspot.com/> %2FAttendance%5CAttendance_" +
-        #                CurrentDate+"_"+Hour+"-"+Minute+".csv?alt=media&token="+bllob['downloadTokens']}
-
-        # UploadDataToDatabase = firebase.post('/uploads', StudentData)
-        retrivedData = AttendanceOfStudent
-        # StudentsPresent.configure(text=retrivedData)
-        cap.release()
-        cv2.destroyAllWindows()
-
+            
+            break        
     
-firebaseConfig = {
-    "apiKey" : "AIzaSyBJi9VLoYk6acx6gjdeunkD3smeNw_fF34",
-    "authDomain": "squareoneatm.firebaseapp.com",
-    "databaseURL": "https://squareoneatm.firebaseio.com",
-    "projectId": "squareoneatm",
-    "storageBucket": "squareoneatm.appspot.com",
-   "messagingSenderId": "945899734915",
-    "appId": "1:945899734915:web:71459240c9c94e819818b6",
-    "measurementId": "G-T2D1QNRRF6"
-  }
-
-# firebase = firebase.FirebaseApplication(
-#         "https://python-firebasesdkinteexample.firebaseio.com/", None)
-# BlobStorage = Blob.from_string(
-#         "gs://python-firebasesdkinteexample.appspot.com")
-
+    
+    cap.release()
+    cv2.destroyAllWindows()
 
 if __name__ == "__main__":
     
     root = Tk()
     root.title("Login")
     root.configure(background='gray5', bd=1, relief=SUNKEN,)
-    root.minsize(700, 300)
-    root.maxsize(700, 300)
-    root.geometry('700x300')
+    root.geometry('698x287')
+    root.minsize(698, 287)
+    root.maxsize(698, 287)
+    
 
     top_frame = Frame(root, bg='black', relief=SUNKEN)
     center = Frame(root, bg='black', relief=SUNKEN, bd=2)
@@ -167,18 +152,18 @@ if __name__ == "__main__":
                       borderwidth=2, relief="sunken", bg="red")
     marquee.pack(side="top", fill=X, expand=True)
 
-    headingLabel = tk.Label(center, text="LOGIN",
-                            bg="green", fg="white", relief=SUNKEN, width=49, height=6, font=('ComicSansMs', 21, 'italic bold'), anchor=CENTER)
+    headingLabel = tk.Label(center, text="LOGIN  \n After Scan press 'Q' for Proceed",
+                            bg="lavender", fg="yellow4", relief=SUNKEN, width=49, height=6, font=('ComicSansMs', 21, 'bold'), anchor=CENTER)
 
     headingLabel.pack(fill=X)
 
-    l_button = Button(bottom_rside_frame, text="Scan Now", highlightbackground='#00cc00', fg="black",
+    l_button = Button(bottom_rside_frame, text="Scan Now", highlightbackground='gold', fg="black",
                       font="times 30 bold", relief=SUNKEN, bd=2, command=scanImage)
     l_button.grid(row=1, column=0, sticky='nsew', pady=(17, 15), padx=(280, 35))
 
 
-    status_label = Label(btm_frame, text=(f"{dt.datetime.now():%a, %b %d %Y}"),
-                         relief=SUNKEN, font="ComicSansMs 10", fg='linen', bg='gray3', bd=0.5, anchor=W)
+    status_label = Label(btm_frame, text=(f"{dt.datetime.now():%a, %b %d %Y}"+",BY-Divay Shanu(1710991234)"),
+                         relief=SUNKEN, font="ComicSansMs 10", fg='gold2', bg='gray3', bd=0.5, anchor=W)
     status_label.pack(fill=X, side=BOTTOM)
 
     root.mainloop()

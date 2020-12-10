@@ -9,8 +9,25 @@ import numpy as np
 from PIL import Image, ImageTk
 import tkinter.font as font
 from tkinter import messagebox
+from subprocess import Popen
+import sys
+import sqlite3
 
 if __name__ == "__main__":
+
+    def Database():
+        name1=Fullname.get()
+        cardNo = SqId.get()
+
+        conn = sqlite3.connect('SquareOne.db')
+        with conn:
+            cursor=conn.cursor()
+        cursor.execute('CREATE TABLE IF NOT EXISTS Student (Fullname TEXT, CardNo TEXT)')
+        cursor.execute('INSERT INTO Student (FullName, CardNo) VALUES(?,?)',(name1,cardNo))
+        cursor.execute('INSERT INTO AccountHistory (Name , cardno) VALUES(?,?)',(name1,cardNo))
+        conn.commit()
+
+
 
     def DeleteIdText():
         EnterIdText.delete(0, 'end')
@@ -85,8 +102,8 @@ if __name__ == "__main__":
         IdArray = []
         for path in ImagesPath:
 
-            if path == 'AllData/DataSetImages/' + '.DS_Store':
-                continue
+            # if path == 'AllData/DataSetImages/' + '.DS_Store':
+            #     continue
 
             
             pilImage = Image.open(path).convert('L')
@@ -110,9 +127,12 @@ if __name__ == "__main__":
     root = tk.Tk()
     root.title("Register")
     root.configure(background='gray5', bd=1, relief=SUNKEN,)
-    root.minsize(700, 500)
-    root.maxsize(700, 500)
-    root.geometry('700x500')
+    root.minsize(700, 480)
+    #root.maxsize(700, 480)
+    root.geometry('710x480')
+
+    Fullname = StringVar()
+    SqId = StringVar()
 
     top_frame = Frame(root, bg='black', relief=SUNKEN)
     center = Frame(root, bg='black', relief=SUNKEN, bd=1)
@@ -122,79 +142,79 @@ if __name__ == "__main__":
     center.grid(row=1, sticky="nsew")
     btm_frame.grid(row=3, sticky="ew")
 
-    headingLabel = tk.Label(top_frame, text="Register Now",
-                            bg="black", fg="white", relief=SUNKEN, width=49, height=4, font=('ComicSansMs', 21, 'italic bold'), anchor=CENTER)
+    headingLabel = tk.Label(top_frame, text="REGISTER NOW",
+                            bg="black", fg="DarkGoldenrod1", relief=SUNKEN, width=40, height=4, font=('ComicSansMs', 25, ' bold'), anchor=CENTER)
 
     headingLabel.pack(fill=X)
 
     enterIDLabel = tk.Label(center, text="Enter your Square One ID", width=20, height=2,
                             fg="black", bg="yellow", font=('Verdana', 13, ' bold '), relief=SUNKEN)
 
-    enterIDLabel.grid(row=0, column=0, padx=(5, 2),
+    enterIDLabel.grid(row=0, column=0, padx=(5, 5),
                       pady=(15, 15), sticky=W+E+N+S, columnspan=1, rowspan=1)
 
-    EnterIdText = tk.Entry(center, width=26, bg="white",
+    EnterIdText = tk.Entry(center, textvar= SqId, width=26, bg="white",
                            fg="black", font=('Verdana', 13, ' bold '), relief=SUNKEN)
 
-    EnterIdText.grid(row=0, column=1, padx=(5, 2),
+    EnterIdText.grid(row=0, column=1, padx=(5, 5),
                      pady=(15, 15), sticky=W+E+N+S, columnspan=1, rowspan=1)
 
     EnterNameLabel = tk.Label(center, text="Enter your Name", width=22, fg="black",
                               bg="yellow", height=2, font=('Verdana', 13, ' bold '), relief=SUNKEN)
 
-    EnterNameLabel.grid(row=1, column=0, padx=(5, 2),
+    EnterNameLabel.grid(row=1, column=0, padx=(5, 5),
                         pady=(15, 15), sticky=W+E+N+S, columnspan=1, rowspan=1)
 
-    EnterNameText = tk.Entry(center, width=21, bg="white",
+    EnterNameText = tk.Entry(center,textvar=Fullname, width=21, bg="white",
                              fg="black", font=('Verdana', 13, ' bold '), relief=SUNKEN)
 
-    EnterNameText.grid(row=1, column=1, padx=(5, 2),
+    EnterNameText.grid(row=1, column=1, padx=(5, 5),
                        pady=(15, 15), sticky=W+E+N+S, columnspan=1, rowspan=1)
 
     Notification = tk.Label(center, text="Status--->", width=20, fg="black",
                             bg="yellow", height=2, font=('Verdana', 13, ' bold '), relief=SUNKEN)
 
-    Notification.grid(row=2, column=0, padx=(5, 2),
+    Notification.grid(row=2, column=0, padx=(5, 5),
                       pady=(15, 15), sticky=W+E+N+S, columnspan=1, rowspan=1)
 
     Messages = tk.Label(center, text="", bg="white", fg="black",
                         width=22, font=('Verdana', 13, ' bold '), relief=SUNKEN)
 
-    Messages.grid(row=2, column=1, padx=(5, 2),
+    Messages.grid(row=2, column=1, padx=(5, 5),
                   pady=(15, 15), sticky=W+E+N+S, columnspan=2, rowspan=1)
 
-    clearIdButton = tk.Button(center, text="Clear!!!", command=DeleteIdText, fg="black", bg="red",
-                              width=20,  bd=2, activebackground="orange", font=('Verdana', 13, ' bold '), relief=SUNKEN)
+    clearIdButton = tk.Button(center, text="Clear!!!", command=DeleteIdText, fg="black",
+                              width=20,  bd=2, highlightbackground="Darkorange3", font=('Verdana', 14, ' bold '), relief=SUNKEN)
 
-    clearIdButton.grid(row=0, column=2, padx=(5, 2),
+    clearIdButton.grid(row=0, column=2, padx=(5, 5),
                        pady=(15, 15), sticky=W+E+N+S, columnspan=1, rowspan=1)
 
-    clearNameButton = tk.Button(center, text="Clear!!!", command=DeleteNameText, fg="black", bg="red",
-                                bd=2, activebackground="orange", font=('Verdana', 13, ' bold '), relief=SUNKEN)
+    clearNameButton = tk.Button(center, text="Clear!!!", command=DeleteNameText, fg="black",
+                                bd=2, highlightbackground="Darkorange3", font=('Verdana', 14, ' bold '), relief=SUNKEN)
 
-    clearNameButton.grid(row=1, column=2, padx=(5, 2),
+    clearNameButton.grid(row=1, column=2, padx=(5, 5),
                          pady=(15, 15), sticky=W+E+N+S, columnspan=1, rowspan=1)
 
     CaptureImgButton = tk.Button(center, text="Capture Images", command=CaptureImages, fg="black", bg="lime",
-                                 bd=2, activebackground="Green", font=('Verdana', 13, ' bold '), relief=SUNKEN)
+                                 bd=2, highlightbackground="green yellow", font=('Verdana', 13, ' bold '), relief=SUNKEN)
 
-    CaptureImgButton.grid(row=4, column=0, padx=(15, 2),
+    CaptureImgButton.grid(row=4, column=0, padx=(10,10),
                           pady=(55, 15), sticky=W+E+N+S, columnspan=1, rowspan=1)
 
-    TrainImgButton = tk.Button(center, text="Train Images", command=trainingImagesDataset, fg="black",
-                               bg="lime", bd=2, activebackground="Green", font=('Verdana', 13, ' bold '), relief=SUNKEN)
+    TrainImgButton = tk.Button(center, text="Train Images", command=lambda:[trainingImagesDataset(), Database()], fg="black",
+                                highlightbackground="dark olive green",background="dark olive green", font=('Verdana', 13, ' bold '), relief=SUNKEN)
 
-    TrainImgButton.grid(row=4, column=1, padx=(15, 2),
+    TrainImgButton.grid(row=4, column=1, padx=(10, 10),
                         pady=(55, 15), sticky=W+E+N+S, columnspan=1, rowspan=1)
 
-    QuitRoot = tk.Button(center, text="Exit", command=root.destroy, fg="black",
-                         bg="red", height=3, bd=2, activebackground="orange", font=('times', 15, ' bold '))
+    QuitRoot = tk.Button(center, text="Back to Login", command=lambda:[Popen([sys.executable, "./gui.py"]), root.destroy()], fg="black",
+                         bg="red", height=3, bd=2, highlightbackground="red2", font=('times', 15, ' bold '))
 
-    QuitRoot.grid(row=4, column=2, padx=(15, 2),
+    QuitRoot.grid(row=4, column=2, padx=(10, 10),
                   pady=(58, 15), sticky=W+E+N+S, columnspan=1, rowspan=1)
 
     Status = tk.Label(btm_frame, text="Designed by Divay Shanu",
-                      relief=SUNKEN, font="ComicSansMs 10", fg='linen', bg='black', bd=0.5, )
+                      relief=SUNKEN, font="ComicSansMs 10", fg='gold2', bg='black', bd=0.5, )
 
     Status.pack(fill=X, side=BOTTOM)
 
